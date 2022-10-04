@@ -78,6 +78,7 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
             } else {
                 uiView.focus(on: focusOnAreaMessage)
             }
+            self.focusOnAreaMessage?.wrappedValue = nil
         }
     }
     
