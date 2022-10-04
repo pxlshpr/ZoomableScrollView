@@ -2,19 +2,6 @@ import SwiftUI
 import VisionSugar
 import SwiftUISugar
 
-public extension Notification.Name {
-    public static var resetZoomableScrollViewScale: Notification.Name { return .init("resetZoomableScrollViewScale") }
-    public static var scrollZoomableScrollViewToRect: Notification.Name { return .init("scrollZoomableScrollViewToRect") }
-}
-
-public extension Notification {
-    public struct Keys {
-        public static let rect = "rect"
-        public static let boundingBox = "boundingBox"
-        public static let imageSize = "imageSize"
-    }
-}
-
 /// This identifies an area of the ZoomableScrollView to focus on
 public struct FocusedArea {
     
@@ -77,7 +64,12 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         assert(context.coordinator.hostingController.view.superview == uiView)
         
         if let focusedArea = focusedArea?.wrappedValue {
-            uiView.focus(on: focusedArea)
+            /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
+            if focusedArea.boundingBox == .zero {
+                uiView.setZoomScale(1, animated: true)
+            } else {
+                uiView.focus(on: focusedArea)
+            }
         }
     }
     

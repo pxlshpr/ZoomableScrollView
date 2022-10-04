@@ -72,19 +72,6 @@ extension ZoomableScrollView {
 
         scrollView.setZoomScale(1, animated: true)
 
-        NotificationCenter.default.addObserver(forName: .resetZoomableScrollViewScale, object: nil, queue: .main) { notification in
-            scrollView.setZoomScale(1, animated: true)
-        }
-
-        NotificationCenter.default.addObserver(forName: .scrollZoomableScrollViewToRect, object: nil, queue: .main) { notification in
-            guard let boundingBox = notification.userInfo?[Notification.Keys.boundingBox] as? CGRect,
-                  let imageSize = notification.userInfo?[Notification.Keys.imageSize] as? CGSize
-            else {
-                return
-            }
-            scrollView.zoomIn(boundingBox: boundingBox, imageSize: imageSize)
-        }
-
         return scrollView
     }
 }
