@@ -15,6 +15,8 @@ public struct FocusedArea {
         self.boundingBox = boundingBox
         self.imageSize = imageSize
     }
+    
+    public static let none = Self.init(boundingBox: .zero, imageSize: .zero)
 }
 
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
