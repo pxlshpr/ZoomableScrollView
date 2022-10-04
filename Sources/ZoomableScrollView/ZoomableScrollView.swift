@@ -20,7 +20,9 @@ public struct FocusedArea {
 }
 
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
+    
     var focusedArea: Binding<FocusedArea?>?
+    @State var lastFocusedArea: FocusedArea? = nil
     
     private var content: Content
     
@@ -72,6 +74,7 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
             } else {
                 uiView.focus(on: focusedArea)
             }
+            self.focusedArea?.wrappedValue = nil
         }
     }
     
