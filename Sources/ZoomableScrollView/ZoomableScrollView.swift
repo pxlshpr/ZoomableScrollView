@@ -3,16 +3,18 @@ import VisionSugar
 import SwiftUISugar
 
 /// This identifies an area of the ZoomableScrollView to focus on
-public struct FocusedArea {
+public struct FocusOnAreaMessage {
     
     /// This is the boundingBox (in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision)
     let boundingBox: CGRect
     let padded: Bool
+    let animated: Bool
     let imageSize: CGSize
     
-    public init(boundingBox: CGRect, padded: Bool = true, imageSize: CGSize) {
+    public init(boundingBox: CGRect, animated: Bool = true, padded: Bool = true, imageSize: CGSize) {
         self.boundingBox = boundingBox
         self.padded = padded
+        self.animated = animated
         self.imageSize = imageSize
     }
     
@@ -21,15 +23,15 @@ public struct FocusedArea {
 
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     
-    var focusedArea: Binding<FocusedArea?>?
-    @State var lastFocusedArea: FocusedArea? = nil
+    var focusOnAreaMessage: Binding<FocusOnAreaMessage?>?
+    @State var lastFocusedArea: FocusOnAreaMessage? = nil
     @State var firstTime: Bool = true
     
     private var content: Content
     
-    public init(focusedArea: Binding<FocusedArea?>? = nil, @ViewBuilder content: () -> Content) {
+    public init(focusOnAreaMessage: Binding<FocusOnAreaMessage?>? = nil, @ViewBuilder content: () -> Content) {
         self.content = content()
-        self.focusedArea = focusedArea
+        self.focusOnAreaMessage = focusOnAreaMessage
     }
     
     public func makeUIView(context: Context) -> UIScrollView {
@@ -68,27 +70,14 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         context.coordinator.hostingController.rootView = self.content
         assert(context.coordinator.hostingController.view.superview == uiView)
         
-        if let focusedArea = focusedArea?.wrappedValue {
+        if let focusOnAreaMessage = focusOnAreaMessage?.wrappedValue {
+            
             /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
-            if focusedArea.boundingBox == .zero {
-                print("🍱🥕 focusedArea.boundingBox was .zero, so resetting zoom")
+            if focusOnAreaMessage.boundingBox == .zero {
                 uiView.setZoomScale(1, animated: true)
             } else {
-                print("🍱🥕 focusedArea.boundingBox was present—focusing on it")
-                
-                if firstTime {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        uiView.focus(on: focusedArea)
-                        firstTime = false
-                    }
-                } else {
-                    uiView.focus(on: focusedArea, animated: false)
-                }
+                uiView.focus(on: focusOnAreaMessage)
             }
-//            self.focusedArea?.wrappedValue = nil
-        } else {
-            print("🍱🥕 focusedArea.boundingBox was nil, so resetting zoom")
-            uiView.setZoomScale(1, animated: true)
         }
     }
     
