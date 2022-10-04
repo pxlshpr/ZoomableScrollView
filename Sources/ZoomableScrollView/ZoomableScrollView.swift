@@ -23,6 +23,11 @@ public struct FocusedArea {
     
     let imageSize: CGSize
     //TODO: Add padding here
+    
+    public init(boundingBox: CGRect, imageSize: CGSize) {
+        self.boundingBox = boundingBox
+        self.imageSize = imageSize
+    }
 }
 
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
