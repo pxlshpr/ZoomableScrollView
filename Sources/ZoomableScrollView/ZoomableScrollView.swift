@@ -70,12 +70,15 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         if let focusedArea = focusedArea?.wrappedValue {
             /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
             if focusedArea.boundingBox == .zero {
+                print("🍱🥕 focusedArea.boundingBox was .zero, so resetting zoom")
                 uiView.setZoomScale(1, animated: true)
             } else {
+                print("🍱🥕 focusedArea.boundingBox was present—focusing on it")
                 uiView.focus(on: focusedArea)
             }
-            self.focusedArea?.wrappedValue = nil
+//            self.focusedArea?.wrappedValue = nil
         } else {
+            print("🍱🥕 focusedArea.boundingBox was nil, so resetting zoom")
             uiView.setZoomScale(1, animated: true)
         }
     }
