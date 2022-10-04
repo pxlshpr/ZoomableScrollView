@@ -1,6 +1,11 @@
 import UIKit
 
 extension UIScrollView {
+
+    func focus(on area: FocusedArea) {
+        zoomIn(boundingBox: area.boundingBox, imageSize: area.imageSize)
+    }
+    
     func zoomIn(boundingBox: CGRect, imageSize: CGSize) {
 
         /// Now determine the box we want to zoom into, given the image's dimensions

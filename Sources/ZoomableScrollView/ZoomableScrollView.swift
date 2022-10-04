@@ -15,11 +15,24 @@ public extension Notification {
     }
 }
 
+/// This identifies an area of the ZoomableScrollView to focus on
+public struct FocusedArea {
+    
+    /// This is the boundingBox (in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision)
+    let boundingBox: CGRect
+    
+    let imageSize: CGSize
+    //TODO: Add padding here
+}
+
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
+    var focusedArea: Binding<FocusedArea>?
+    
     private var content: Content
     
-    public init(@ViewBuilder content: () -> Content) {
+    public init(focusedArea: Binding<FocusedArea>? = nil, @ViewBuilder content: () -> Content) {
         self.content = content()
+        self.focusedArea = focusedArea
     }
     
     public func makeUIView(context: Context) -> UIScrollView {
@@ -57,6 +70,10 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         // update the hosting controller's SwiftUI content
         context.coordinator.hostingController.rootView = self.content
         assert(context.coordinator.hostingController.view.superview == uiView)
+        
+        if let focusedArea {
+            uiView.focus(on: focusedArea.wrappedValue)
+        }
     }
     
     // MARK: - Coordinator
