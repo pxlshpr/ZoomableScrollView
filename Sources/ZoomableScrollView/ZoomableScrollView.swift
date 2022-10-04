@@ -31,11 +31,11 @@ public struct FocusedArea {
 }
 
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
-    var focusedArea: Binding<FocusedArea>?
+    var focusedArea: Binding<FocusedArea?>?
     
     private var content: Content
     
-    public init(focusedArea: Binding<FocusedArea>? = nil, @ViewBuilder content: () -> Content) {
+    public init(focusedArea: Binding<FocusedArea?>? = nil, @ViewBuilder content: () -> Content) {
         self.content = content()
         self.focusedArea = focusedArea
     }
@@ -76,8 +76,8 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         context.coordinator.hostingController.rootView = self.content
         assert(context.coordinator.hostingController.view.superview == uiView)
         
-        if let focusedArea {
-            uiView.focus(on: focusedArea.wrappedValue)
+        if let focusedArea = focusedArea?.wrappedValue {
+            uiView.focus(on: focusedArea)
         }
     }
     
