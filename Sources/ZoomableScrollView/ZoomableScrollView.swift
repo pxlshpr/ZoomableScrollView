@@ -2,16 +2,16 @@ import SwiftUI
 import VisionSugar
 import SwiftUISugar
 
-extension Notification.Name {
-    static var resetZoomableScrollViewScale: Notification.Name { return .init("resetZoomableScrollViewScale") }
-    static var scrollZoomableScrollViewToRect: Notification.Name { return .init("scrollZoomableScrollViewToRect") }
+public extension Notification.Name {
+    public static var resetZoomableScrollViewScale: Notification.Name { return .init("resetZoomableScrollViewScale") }
+    public static var scrollZoomableScrollViewToRect: Notification.Name { return .init("scrollZoomableScrollViewToRect") }
 }
 
-extension Notification {
-    struct Keys {
-        static let rect = "rect"
-        static let boundingBox = "boundingBox"
-        static let imageSize = "imageSize"
+public extension Notification {
+    public struct Keys {
+        public static let rect = "rect"
+        public static let boundingBox = "boundingBox"
+        public static let imageSize = "imageSize"
     }
 }
 
