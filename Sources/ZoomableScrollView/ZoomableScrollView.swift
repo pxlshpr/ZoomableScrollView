@@ -23,6 +23,7 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     
     var focusedArea: Binding<FocusedArea?>?
     @State var lastFocusedArea: FocusedArea? = nil
+    @State var firstTime: Bool = true
     
     private var content: Content
     
@@ -74,7 +75,15 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
                 uiView.setZoomScale(1, animated: true)
             } else {
                 print("🍱🥕 focusedArea.boundingBox was present—focusing on it")
-                uiView.focus(on: focusedArea)
+                
+                if firstTime {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        uiView.focus(on: focusedArea)
+                        firstTime = false
+                    }
+                } else {
+                    uiView.focus(on: focusedArea, animated: false)
+                }
             }
 //            self.focusedArea?.wrappedValue = nil
         } else {

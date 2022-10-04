@@ -2,11 +2,11 @@ import UIKit
 
 extension UIScrollView {
 
-    func focus(on area: FocusedArea) {
-        zoomIn(boundingBox: area.boundingBox, padded: area.padded, imageSize: area.imageSize)
+    func focus(on area: FocusedArea, animated: Bool = true) {
+        zoomIn(boundingBox: area.boundingBox, padded: area.padded, imageSize: area.imageSize, animated: animated)
     }
     
-    func zoomIn(boundingBox: CGRect, padded: Bool, imageSize: CGSize) {
+    func zoomIn(boundingBox: CGRect, padded: Bool, imageSize: CGSize, animated: Bool = true) {
 
         /// Now determine the box we want to zoom into, given the image's dimensions
         /// Now if the image's width/height ratio is less than the scrollView's
@@ -103,6 +103,6 @@ extension UIScrollView {
             print("newBox (padded): \(newBox)")
         }
 
-        zoom(to: newBox, animated: true)
+        zoom(to: newBox, animated: animated)
     }
 }
