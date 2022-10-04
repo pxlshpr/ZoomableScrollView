@@ -74,7 +74,6 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
             } else {
                 uiView.focus(on: focusedArea)
             }
-            self.focusedArea?.wrappedValue = nil
         }
     }
     
@@ -88,6 +87,10 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         
         public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             return hostingController.view
+        }
+        
+        public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            print("didScroll")
         }
     }
 }
