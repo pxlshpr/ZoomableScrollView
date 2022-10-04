@@ -7,12 +7,12 @@ public struct FocusedArea {
     
     /// This is the boundingBox (in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision)
     let boundingBox: CGRect
-    
+    let padded: Bool
     let imageSize: CGSize
-    //TODO: Add padding here
     
-    public init(boundingBox: CGRect, imageSize: CGSize) {
+    public init(boundingBox: CGRect, padded: Bool = true, imageSize: CGSize) {
         self.boundingBox = boundingBox
+        self.padded = padded
         self.imageSize = imageSize
     }
     

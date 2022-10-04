@@ -3,10 +3,10 @@ import UIKit
 extension UIScrollView {
 
     func focus(on area: FocusedArea) {
-        zoomIn(boundingBox: area.boundingBox, imageSize: area.imageSize)
+        zoomIn(boundingBox: area.boundingBox, padded: area.padded, imageSize: area.imageSize)
     }
     
-    func zoomIn(boundingBox: CGRect, imageSize: CGSize) {
+    func zoomIn(boundingBox: CGRect, padded: Bool, imageSize: CGSize) {
 
         /// Now determine the box we want to zoom into, given the image's dimensions
         /// Now if the image's width/height ratio is less than the scrollView's
@@ -71,35 +71,37 @@ extension UIScrollView {
         }
         print("newBox: \(newBox)")
 
-        let minimumPadding: CGFloat = 5
-        let zoomOutPaddingRatio: CGFloat = min(newImageSize.width / (newBox.size.width * 5), 3.5)
-        print("zoomOutPaddingRatio: \(zoomOutPaddingRatio)")
+        if padded {
+            let minimumPadding: CGFloat = 5
+            let zoomOutPaddingRatio: CGFloat = min(newImageSize.width / (newBox.size.width * 5), 3.5)
+            print("zoomOutPaddingRatio: \(zoomOutPaddingRatio)")
 
-        /// If the box is longer than it is tall
-        if newBox.size.widthToHeightRatio > 1 {
-            /// Add 100% padding to its horizontal side
-            let padding = newBox.size.width * zoomOutPaddingRatio
-            newBox.origin.x -= (padding / 2.0)
-            newBox.size.width += padding
+            /// If the box is longer than it is tall
+            if newBox.size.widthToHeightRatio > 1 {
+                /// Add 100% padding to its horizontal side
+                let padding = newBox.size.width * zoomOutPaddingRatio
+                newBox.origin.x -= (padding / 2.0)
+                newBox.size.width += padding
 
-            /// Now correct the values in case they're out of bounds
-            newBox.origin.x = max(minimumPadding, newBox.origin.x)
-            if newBox.maxX > newImageSize.width {
-                newBox.size.width = newImageSize.width - newBox.origin.x - minimumPadding
+                /// Now correct the values in case they're out of bounds
+                newBox.origin.x = max(minimumPadding, newBox.origin.x)
+                if newBox.maxX > newImageSize.width {
+                    newBox.size.width = newImageSize.width - newBox.origin.x - minimumPadding
+                }
+            } else {
+                /// Add 100% padding to its vertical side
+                let padding = newBox.size.height * zoomOutPaddingRatio
+                newBox.origin.y -= (padding / 2.0)
+                newBox.size.height += padding
+
+                /// Now correct the values in case they're out of bounds
+                newBox.origin.y = max(minimumPadding, newBox.origin.y)
+                if newBox.maxY > newImageSize.height {
+                    newBox.size.height = newImageSize.height - newBox.origin.y - minimumPadding
+                }
             }
-        } else {
-            /// Add 100% padding to its vertical side
-            let padding = newBox.size.height * zoomOutPaddingRatio
-            newBox.origin.y -= (padding / 2.0)
-            newBox.size.height += padding
-
-            /// Now correct the values in case they're out of bounds
-            newBox.origin.y = max(minimumPadding, newBox.origin.y)
-            if newBox.maxY > newImageSize.height {
-                newBox.size.height = newImageSize.height - newBox.origin.y - minimumPadding
-            }
+            print("newBox (padded): \(newBox)")
         }
-        print("newBox (padded): \(newBox)")
 
         zoom(to: newBox, animated: true)
     }
