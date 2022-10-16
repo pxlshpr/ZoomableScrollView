@@ -7,13 +7,13 @@ public struct FocusedBox {
     
     /// This is the boundingBox (in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision)
     let boundingBox: CGRect
-    let padded: Bool
+    let paddingType: ZoomPaddingType?
     let animated: Bool
     let imageSize: CGSize
     
-    public init(boundingBox: CGRect, animated: Bool = true, padded: Bool = true, imageSize: CGSize) {
+    public init(boundingBox: CGRect, animated: Bool = true, paddingType: ZoomPaddingType? = .smallElement, imageSize: CGSize) {
         self.boundingBox = boundingBox
-        self.padded = padded
+        self.paddingType = paddingType
         self.animated = animated
         self.imageSize = imageSize
     }
