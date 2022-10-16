@@ -73,7 +73,8 @@ extension UIScrollView {
 
         if padded {
             let minimumPadding: CGFloat = 5
-            let zoomOutPaddingRatio: CGFloat = min(newImageSize.width / (newBox.size.width * 5), 3.5)
+//            let zoomOutPaddingRatio: CGFloat = min(newImageSize.width / (newBox.size.width * 5), 3.5)
+            let zoomOutPaddingRatio: CGFloat = newImageSize.width / (newBox.size.width * 5)
             print("zoomOutPaddingRatio: \(zoomOutPaddingRatio)")
 
             /// If the box is longer than it is tall
