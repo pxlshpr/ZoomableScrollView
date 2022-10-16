@@ -83,8 +83,7 @@ extension CGRect {
     func paddedForSmallElement(within parentSize: CGSize) -> CGRect {
         var newBox = self
         let minimumPadding: CGFloat = 5
-//            let zoomOutPaddingRatio: CGFloat = min(newImageSize.width / (newBox.size.width * 5), 3.5)
-        let zoomOutPaddingRatio: CGFloat = parentSize.width / (newBox.size.width * 5)
+        let zoomOutPaddingRatio: CGFloat = min(parentSize.width / (newBox.size.width * 5), 3.5)
         print("zoomOutPaddingRatio: \(zoomOutPaddingRatio)")
 
         /// If the box is longer than it is tall
