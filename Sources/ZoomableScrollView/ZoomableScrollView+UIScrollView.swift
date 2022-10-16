@@ -21,6 +21,9 @@ extension ZoomableScrollView {
 
         let hosted = hostedView(context: context)
         hosted.frame = scrollView.bounds
+        if let backgroundColor {
+            hosted.backgroundColor = backgroundColor
+        }
         scrollView.addSubview(hosted)
 
         scrollView.setZoomScale(1, animated: true)
