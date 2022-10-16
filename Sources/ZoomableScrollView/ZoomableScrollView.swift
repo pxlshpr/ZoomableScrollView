@@ -30,7 +30,7 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     let backgroundColor: UIColor?
     private var content: Content
     
-    public init(focusedBox: Binding<FocusedBox?>? = nil, backgroundColor: UIColor?, @ViewBuilder content: () -> Content) {
+    public init(focusedBox: Binding<FocusedBox?>? = nil, backgroundColor: UIColor? = nil, @ViewBuilder content: () -> Content) {
         self.backgroundColor = backgroundColor
         self.content = content()
         self.focusedBox = focusedBox
