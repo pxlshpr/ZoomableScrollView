@@ -2,7 +2,7 @@ import UIKit
 
 extension UIScrollView {
 
-    func focus(on message: FocusOnAreaMessage, animated: Bool = true) {
+    func focus(on message: FocusedBox, animated: Bool = true) {
         zoomIn(boundingBox: message.boundingBox, padded: message.padded, imageSize: message.imageSize, animated: message.animated)
     }
     

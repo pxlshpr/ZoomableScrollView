@@ -3,7 +3,7 @@ import VisionSugar
 import SwiftUISugar
 
 /// This identifies an area of the ZoomableScrollView to focus on
-public struct FocusOnAreaMessage {
+public struct FocusedBox {
     
     /// This is the boundingBox (in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision)
     let boundingBox: CGRect
@@ -23,15 +23,15 @@ public struct FocusOnAreaMessage {
 
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     
-    var focusOnAreaMessage: Binding<FocusOnAreaMessage?>?
-    @State var lastFocusedArea: FocusOnAreaMessage? = nil
+    var focusedBox: Binding<FocusedBox?>?
+    @State var lastFocusedArea: FocusedBox? = nil
     @State var firstTime: Bool = true
     
     private var content: Content
     
-    public init(focusOnAreaMessage: Binding<FocusOnAreaMessage?>? = nil, @ViewBuilder content: () -> Content) {
+    public init(focusedBox: Binding<FocusedBox?>? = nil, @ViewBuilder content: () -> Content) {
         self.content = content()
-        self.focusOnAreaMessage = focusOnAreaMessage
+        self.focusedBox = focusedBox
     }
     
     public func makeUIView(context: Context) -> UIScrollView {
@@ -47,15 +47,15 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         context.coordinator.hostingController.rootView = self.content
         assert(context.coordinator.hostingController.view.superview == uiView)
         
-        if let focusOnAreaMessage = focusOnAreaMessage?.wrappedValue {
+        if let focusedBox = focusedBox?.wrappedValue {
             
             /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
-            if focusOnAreaMessage.boundingBox == .zero {
+            if focusedBox.boundingBox == .zero {
                 uiView.setZoomScale(1, animated: true)
             } else {
-                uiView.focus(on: focusOnAreaMessage)
+                uiView.focus(on: focusedBox)
             }
-            self.focusOnAreaMessage?.wrappedValue = nil
+//            self.focusedBox?.wrappedValue = nil
         }
     }
     
