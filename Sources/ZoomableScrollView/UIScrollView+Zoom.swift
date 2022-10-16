@@ -49,12 +49,12 @@ extension UIScrollView {
         let scaledImageSize = CGSize(width: width, height: height)
 
         var newBox = boundingBox.rectForSize(scaledImageSize)
-        if let paddingLeft = paddingLeft {
-            newBox.origin.x += paddingLeft
-        }
-        if let paddingTop = paddingTop {
-            newBox.origin.y += paddingTop
-        }
+//        if let paddingLeft = paddingLeft {
+//            newBox.origin.x += paddingLeft
+//        }
+//        if let paddingTop = paddingTop {
+//            newBox.origin.y += paddingTop
+//        }
         print("newBox: \(newBox)")
 
         if let paddingType {
