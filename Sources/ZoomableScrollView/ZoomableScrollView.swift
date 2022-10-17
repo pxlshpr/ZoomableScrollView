@@ -7,13 +7,13 @@ public struct FocusedBox {
     
     /// This is the boundingBox (in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision)
     let boundingBox: CGRect
-    let paddingType: ZoomPaddingType?
+    let padded: Bool
     let animated: Bool
     let imageSize: CGSize
     
-    public init(boundingBox: CGRect, animated: Bool = true, paddingType: ZoomPaddingType? = .smallElement, imageSize: CGSize) {
+    public init(boundingBox: CGRect, animated: Bool = true, padded: Bool = true, imageSize: CGSize) {
         self.boundingBox = boundingBox
-        self.paddingType = paddingType
+        self.padded = padded
         self.animated = animated
         self.imageSize = imageSize
     }
@@ -57,7 +57,7 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
             } else {
                 uiView.focus(on: focusedBox)
             }
-//            self.focusedBox?.wrappedValue = nil
+            //            self.focusedBox?.wrappedValue = nil
         }
     }
     
@@ -76,6 +76,10 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         @objc func doubleTapped(recognizer:  UITapGestureRecognizer) {
             
         }
+        
+//        public func scrollViewDidZoom(_ scrollView: UIScrollView) {
+//            print("zoomScale is \(scrollView.zoomScale)")
+//        }
     }
 }
 
@@ -120,7 +124,6 @@ extension UIView {
     // which triggers the closure we stored
     @objc fileprivate func handleTapGesture(sender: UITapGestureRecognizer) {
         if let action = self.tapGestureRecognizerAction {
-            let location = sender.location(in: self)
             action?(sender)
         } else {
             print("no action")
