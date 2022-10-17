@@ -1,3 +1,4 @@
+
 import SwiftUI
 import VisionSugar
 import SwiftUISugar
@@ -29,52 +30,76 @@ extension ZoomableScrollView {
         scrollView.setZoomScale(1, animated: true)
         
         scrollView.addTapGestureRecognizer { sender in
-            
-            //TODO: Rewrite this
-            /// - Default should be to have a maximum scale, and
-            ///     If we're less than that (and not super-close to it): zoom into it
-            ///     Otherwise, if we're close to it, at it, or past it: zoom back out to full scale
-            /// - Now also have a handler that can be provided to this, which overrides this default
-            ///     It should provide the current zoom scale and
-            ///     Get back an enum called ZoomPosition as a result
-            ///         This can be either fullScale, maxScale, or rect(let CGRect) where we provide a rect
-            ///         The scrollview than either zooms to full, max or the provided rect
-            /// - Now have TextPicker use this to
-            ///     See if the zoomScale is above or below the selected bound's scale
-            ///         This can be determined by dividing the rects dimensions by the image's and returning the larger? amount
-            ///     If it's greater than the selectedBoundZoomScale:
-            ///         If the selectedBoundZoomScale is less than the constant MaxScale of ZoomScrollView
-            ///         (by at least a minimum distance—also set by ZoomedScrollView)
-            ///             Then we return MaxScale as the ZoomPosition
-            ///         Else we return FullScale as the ZoomPosition (scale = 1)
-            ///     Else we return rect(selectedBound) as the ZoomPosition
-            
             let hostedView = hostedView(context: context)
             let point = sender.location(in: hostedView)
-            let sizeToBaseRectOn = scrollView.frame.size
-            //            let sizeToBaseRectOn = hostedView.frame.size
-            
-            let size = CGSize(width: sizeToBaseRectOn.width / 2,
-                              height: sizeToBaseRectOn.height / 2)
-            let zoomSize = CGSize(width: size.width / scrollView.zoomScale,
-                                  height: size.height / scrollView.zoomScale)
-            
-            print("""
-Got a tap at: \(point), when:
-    hostedView.size: \(hostedView.frame.size)
-    scrollView.size: \(scrollView.frame.size)
-    scrollView.contentSize: \(scrollView.contentSize)
-    scrollView.zoomScale: \(scrollView.zoomScale)
-    size: \(size)
-    🔍 zoomSize: \(zoomSize)
-""")
-            
-            let origin = CGPoint(x: point.x - zoomSize.width / 2,
-                                 y: point.y - zoomSize.height / 2)
-            scrollView.zoom(to:CGRect(origin: origin, size: zoomSize), animated: true)
+            handleDoubleTap(on: point, for: scrollView)
         }
         
         return scrollView
+    }
+    
+    //TODO: Rewrite this
+    /// - Now also have a handler that can be provided to this, which overrides this default
+    ///     It should provide the current zoom scale and
+    ///     Get back an enum called ZoomPosition as a result
+    ///         This can be either fullScale, maxScale, or rect(let CGRect) where we provide a rect
+    ///         The scrollview than either zooms to full, max or the provided rect
+    /// - Now have TextPicker use this to
+    ///     See if the zoomScale is above or below the selected bound's scale
+    ///         This can be determined by dividing the rects dimensions by the image's and returning the larger? amount
+    ///     If it's greater than the selectedBoundZoomScale:
+    ///         If the selectedBoundZoomScale is less than the constant MaxScale of ZoomScrollView
+    ///         (by at least a minimum distance—also set by ZoomedScrollView)
+    ///             Then we return MaxScale as the ZoomPosition
+    ///         Else we return FullScale as the ZoomPosition (scale = 1)
+    ///     Else we return rect(selectedBound) as the ZoomPosition
+    func handleDoubleTap(on point: CGPoint, for scrollView: UIScrollView) {
+        let maxZoomScale = 3.5
+        let minDelta = 0.5
+
+        if let zoomBox = zoomBox?.wrappedValue {
+            let boundingBoxScale = zoomScaleOfBoundingBox(zoomBox.boundingBox,
+                                                          forImageSize: zoomBox.imageSize,
+                                                          padded: zoomBox.padded,
+                                                          scrollView: scrollView)
+            if scrollView.zoomScale < boundingBoxScale {
+                scrollView.focus(on: zoomBox)
+            } else {
+                scrollView.zoomToScale(1, on: point)
+            }
+        } else {
+            let newScale: CGFloat
+            if scrollView.zoomScale < (maxZoomScale - minDelta) {
+                newScale = maxZoomScale
+            } else {
+                newScale = 1
+            }
+            scrollView.zoomToScale(newScale, on: point)
+        }
+    }
+
+    func zoomRectForDoubleTap(on point: CGPoint, for scrollView: UIScrollView) -> CGRect {
+        return scrollView.zoomRect(forFactorChangeInZoomScaleOf: 5, on: point)
+    }
+    
+    func zoomRectForDoubleTap_legacy(on point: CGPoint, for scrollView: UIScrollView) -> CGRect {
+        let sizeToBaseRectOn = scrollView.frame.size
+        
+        let size = CGSize(width: sizeToBaseRectOn.width / 2,
+                          height: sizeToBaseRectOn.height / 2)
+        let zoomSize = CGSize(width: size.width / scrollView.zoomScale,
+                              height: size.height / scrollView.zoomScale)
+        
+        let origin = CGPoint(x: point.x - zoomSize.width / 2,
+                             y: point.y - zoomSize.height / 2)
+        return CGRect(origin: origin, size: zoomSize)
+    }
+    
+    func zoomScaleOfBoundingBox(_ boundingBox: CGRect, forImageSize imageSize: CGSize, padded: Bool, scrollView: UIScrollView) -> CGFloat {
+        let zoomRect = boundingBox.zoomRect(forImageSize: imageSize,
+                                            fittedInto: scrollView.frame.size,
+                                            padded: padded)
+        return zoomRect.zoomScale(within: scrollView.frame.size)
     }
     
     func zoomRectForScale(scale: CGFloat, center: CGPoint, scrollView: UIScrollView, context: Context) -> CGRect {
@@ -86,6 +111,7 @@ Got a tap at: \(point), when:
         zoomRect.origin.y = newCenter.y - (zoomRect.size.height / 2.0)
         return zoomRect
     }
+    
     //    func userDoubleTappedScrollview(recognizer:  UITapGestureRecognizer) {
     //        if (zoomScale > minimumZoomScale) {
     //            setZoomScale(minimumZoomScale, animated: true)

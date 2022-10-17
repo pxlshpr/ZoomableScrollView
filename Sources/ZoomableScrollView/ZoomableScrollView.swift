@@ -23,17 +23,25 @@ public struct FocusedBox {
 
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     
-    var focusedBox: Binding<FocusedBox?>?
     @State var lastFocusedArea: FocusedBox? = nil
     @State var firstTime: Bool = true
     
     let backgroundColor: UIColor?
     private var content: Content
     
-    public init(focusedBox: Binding<FocusedBox?>? = nil, backgroundColor: UIColor? = nil, @ViewBuilder content: () -> Content) {
+    var focusedBox: Binding<FocusedBox?>?
+    var zoomBox: Binding<FocusedBox?>?
+
+    public init(
+        focusedBox: Binding<FocusedBox?>? = nil,
+        zoomBox: Binding<FocusedBox?>? = nil,
+        backgroundColor: UIColor? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
         self.backgroundColor = backgroundColor
         self.content = content()
         self.focusedBox = focusedBox
+        self.zoomBox = zoomBox
     }
     
     public func makeUIView(context: Context) -> UIScrollView {
@@ -77,8 +85,8 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
             
         }
         
-//        public func scrollViewDidZoom(_ scrollView: UIScrollView) {
-//            print("zoomScale is \(scrollView.zoomScale)")
-//        }
+        public func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            print("🔍 zoomScale is \(scrollView.zoomScale)")
+        }
     }
 }
