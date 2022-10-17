@@ -15,7 +15,7 @@ let package = Package(
             targets: ["ZoomableScrollView"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.72"),
+        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.187"),
         .package(url: "https://github.com/pxlshpr/VisionSugar", from: "0.0.54"),
     ],
     targets: [
