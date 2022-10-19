@@ -19,9 +19,11 @@ extension ZoomableScrollView {
         scrollView.maximumZoomScale = 20
         scrollView.minimumZoomScale = 1
         scrollView.bouncesZoom = true
+        scrollView.contentInsetAdjustmentBehavior = .never
         
         let hosted = hostedView(context: context)
         hosted.frame = scrollView.bounds
+        hosted.insetsLayoutMarginsFromSafeArea = false
         if let backgroundColor {
             hosted.backgroundColor = backgroundColor
         }
