@@ -44,51 +44,31 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         self.zoomBox = zoomBox
     }
     
-    public func makeCoordinator() -> Coordinator {
-        let hostingController = UIHostingController(rootView: self.content)
-        return Coordinator(hostingController: hostingController)
-    }
-    
     public func makeUIView(context: Context) -> UIScrollView {
         scrollView(context: context)
     }
-
-    public func updateUIView(_ scrollView: UIScrollView, context: Context) {
+    
+    public func makeCoordinator() -> Coordinator {
+        return Coordinator(hostingController: UIHostingController(rootView: self.content))
+    }
+    
+    public func updateUIView(_ uiView: UIScrollView, context: Context) {
         // update the hosting controller's SwiftUI content
         context.coordinator.hostingController.rootView = self.content
-        assert(context.coordinator.hostingController.view.superview == scrollView)
-
-//        
-//        let delay = 0.01
-//        
-//        /// we need to first set the `zoomScale` to something other than 1
-//        /// then set it back to 1 before zooming into the actual box
-//        /// in order to alleviate an issue we get with the first programmatic zoom out offseting the contents by a safe area height.
-//        /// This seems to be a limitation with not being able to ignore the safe area directly over here.
-//        /// We got as far as [this](https://stackoverflow.com/a/73146559), but was still unable to remove the initial glitch.
-//        scrollView.layer.opacity = 0
-//        scrollView.setZoomScale(1, animated: false)
-//        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-//            scrollView.setZoomScale(2, animated: false)
-//            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-//                scrollView.setZoomScale(1, animated: false)
-//                
-//                UIView.animate(withDuration: 0.01) {
-//                    scrollView.layer.opacity = 1
-//                }
-//                
-//                guard let focusedBox = focusedBox?.wrappedValue, focusedBox.boundingBox != .zero else {
-//                    return
-//                }
-//
-//                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-//                    scrollView.focus(on: focusedBox)
-//                }
-//            }
-//        
-//        }
+        assert(context.coordinator.hostingController.view.superview == uiView)
+        
+        if let focusedBox = focusedBox?.wrappedValue {
+            
+            /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
+            if focusedBox.boundingBox == .zero {
+                uiView.setZoomScale(1, animated: true)
+            } else {
+                uiView.focus(on: focusedBox)
+            }
+            //            self.focusedBox?.wrappedValue = nil
+        }
     }
-
+    
     // MARK: - Coordinator
     public class Coordinator: NSObject, UIScrollViewDelegate {
         var hostingController: UIHostingController<Content>
@@ -108,33 +88,5 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         public func scrollViewDidZoom(_ scrollView: UIScrollView) {
             print("🔍 zoomScale is \(scrollView.zoomScale)")
         }
-    }
-    
-    func view(content: Context) -> UIView {
-        let view = UIView()
-        view.backgroundColor = .purple
-        return view
-    }
-
-}
-
-struct ContentView: View {
-    var body: some View {
-        Color.clear
-            .fullScreenCover(isPresented: .constant(true)) {
-                ZoomableScrollView {
-                    Image("label")
-                        .resizable()
-                        .scaledToFit()
-                }
-                .ignoresSafeArea(edges: .all)
-                .background(.yellow)
-            }
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }
