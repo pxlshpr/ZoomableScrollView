@@ -58,35 +58,35 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         context.coordinator.hostingController.rootView = self.content
         assert(context.coordinator.hostingController.view.superview == scrollView)
 
-        
-        let delay = 0.01
-        
-        /// we need to first set the `zoomScale` to something other than 1
-        /// then set it back to 1 before zooming into the actual box
-        /// in order to alleviate an issue we get with the first programmatic zoom out offseting the contents by a safe area height.
-        /// This seems to be a limitation with not being able to ignore the safe area directly over here.
-        /// We got as far as [this](https://stackoverflow.com/a/73146559), but was still unable to remove the initial glitch.
-        scrollView.layer.opacity = 0
-        scrollView.setZoomScale(1, animated: false)
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            scrollView.setZoomScale(2, animated: false)
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                scrollView.setZoomScale(1, animated: false)
-                
-                UIView.animate(withDuration: 0.01) {
-                    scrollView.layer.opacity = 1
-                }
-                
-                guard let focusedBox = focusedBox?.wrappedValue, focusedBox.boundingBox != .zero else {
-                    return
-                }
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                    scrollView.focus(on: focusedBox)
-                }
-            }
-        
-        }
+//        
+//        let delay = 0.01
+//        
+//        /// we need to first set the `zoomScale` to something other than 1
+//        /// then set it back to 1 before zooming into the actual box
+//        /// in order to alleviate an issue we get with the first programmatic zoom out offseting the contents by a safe area height.
+//        /// This seems to be a limitation with not being able to ignore the safe area directly over here.
+//        /// We got as far as [this](https://stackoverflow.com/a/73146559), but was still unable to remove the initial glitch.
+//        scrollView.layer.opacity = 0
+//        scrollView.setZoomScale(1, animated: false)
+//        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+//            scrollView.setZoomScale(2, animated: false)
+//            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+//                scrollView.setZoomScale(1, animated: false)
+//                
+//                UIView.animate(withDuration: 0.01) {
+//                    scrollView.layer.opacity = 1
+//                }
+//                
+//                guard let focusedBox = focusedBox?.wrappedValue, focusedBox.boundingBox != .zero else {
+//                    return
+//                }
+//
+//                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+//                    scrollView.focus(on: focusedBox)
+//                }
+//            }
+//        
+//        }
     }
 
     // MARK: - Coordinator
