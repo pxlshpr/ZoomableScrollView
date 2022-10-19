@@ -57,7 +57,9 @@ extension ZoomableScrollView {
         let maxZoomScale = 3.5
         let minDelta = 0.5
 
-        if let zoomBox = zoomBox?.wrappedValue {
+        if let zoomBox = zoomBox?.wrappedValue,
+           zoomBox.boundingBox != .zero
+        {
             let boundingBoxScale = zoomScaleOfBoundingBox(zoomBox.boundingBox,
                                                           forImageSize: zoomBox.imageSize,
                                                           padded: zoomBox.padded,
