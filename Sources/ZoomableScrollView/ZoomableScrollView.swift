@@ -64,7 +64,9 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
                 return
             }
             
-            if zoomBox.boundingBox == .zero, scrollView.zoomScale != 1 {
+            if zoomBox.boundingBox == .zero {
+                /// Only set the `zoomScale` to 1 if it's not already at 1
+                guard scrollView.zoomScale != 1 else { return }
                 scrollView.setZoomScale(1, animated: false)
             } else {
                 scrollView.zoom(onTo: zoomBox)
