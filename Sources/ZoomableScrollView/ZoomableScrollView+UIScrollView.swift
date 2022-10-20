@@ -67,7 +67,7 @@ extension ZoomableScrollView {
                                                           padded: zoomBox.padded,
                                                           scrollView: scrollView)
             if scrollView.zoomScale < boundingBoxScale {
-                scrollView.focus(on: zoomBox)
+                scrollView.zoom(onTo: zoomBox)
             } else {
                 scrollView.zoomToScale(1, on: point)
             }

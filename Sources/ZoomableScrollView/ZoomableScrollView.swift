@@ -4,24 +4,20 @@ import SwiftUISugar
 
 public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     
-    @State var lastFocusedArea: FocusedBox? = nil
-    @State var firstTime: Bool = true
-    
+    var id: UUID
+    var zoomBox: Binding<ZoomBox?>?
     let backgroundColor: UIColor?
-    private var content: Content
-    
-//    var focusedBox: Binding<FocusedBox?>?
-    var zoomBox: Binding<FocusedBox?>?
+    var content: Content
 
     public init(
-//        focusedBox: Binding<FocusedBox?>? = nil,
-        zoomBox: Binding<FocusedBox?>? = nil,
+        id: UUID = UUID(),
+        zoomBox: Binding<ZoomBox?>? = nil,
         backgroundColor: UIColor? = nil,
         @ViewBuilder content: () -> Content
     ) {
+        self.id = id
         self.backgroundColor = backgroundColor
         self.content = content()
-//        self.focusedBox = focusedBox
         self.zoomBox = zoomBox
     }
     
@@ -36,63 +32,42 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     }
     
     public func makeCoordinator() -> Coordinator {
-        return Coordinator(hostingController: UIHostingController(rootView: self.content))
+        return Coordinator(
+            id: id,
+            hostingController: UIHostingController(rootView: self.content)
+        )
     }
     
     public func updateUIView(_ scrollView: UIScrollView, context: Context) {
         context.coordinator.hostingController.rootView = self.content
         assert(context.coordinator.hostingController.view.superview == scrollView)
-        
-//        Task(priority: .high) {
-//            await MainActor.run { scrollView.setZoomScale(1.01, animated: false) }
-//            await MainActor.run { scrollView.setZoomScale(1, animated: false) }
-//
-//            await MainActor.run {
-//                guard let focusedBox = focusedBox?.wrappedValue else {
-//                    return
-//                }
-//                if focusedBox.boundingBox == .zero, scrollView.zoomScale != 1 {
-//                    scrollView.setZoomScale(1, animated: false)
-//                } else {
-//                    scrollView.focus(on: focusedBox)
-//                }
-//            }
-//        }
-        
-//        if let focusedBox = focusedBox?.wrappedValue {
-//
-//            /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
-//            if focusedBox.boundingBox == .zero {
-//                uiView.setZoomScale(1, animated: true)
-//            } else {
-//                uiView.focus(on: focusedBox)
-//            }
-//            //            self.focusedBox?.wrappedValue = nil
-//        }
     }
     
     // MARK: - Coordinator
     public class Coordinator: NSObject, UIScrollViewDelegate {
+        let id: UUID
         var hostingController: UIHostingController<Content>
         var scrollView: UIScrollView? = nil
         
-        init(hostingController: UIHostingController<Content>) {
+        init(id: UUID, hostingController: UIHostingController<Content>) {
             self.hostingController = hostingController
+            self.id = id
             super.init()
-            NotificationCenter.default.addObserver(self, selector: #selector(focusZoomableScrollView), name: .focusZoomableScrollView, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(zoomZoomableScrollView), name: .zoomZoomableScrollView, object: nil)
         }
         
-        @objc func focusZoomableScrollView(notification: Notification) {
-            guard let focusedBox = notification.userInfo?[Notification.ZoomableScrollViewKeys.focusedBox] as? FocusedBox,
+        @objc func zoomZoomableScrollView(notification: Notification) {
+            guard let zoomBox = notification.userInfo?[Notification.ZoomableScrollViewKeys.zoomBox] as? ZoomBox,
+                  zoomBox.imageId == id,
                   let scrollView
             else {
                 return
             }
             
-            if focusedBox.boundingBox == .zero, scrollView.zoomScale != 1 {
+            if zoomBox.boundingBox == .zero, scrollView.zoomScale != 1 {
                 scrollView.setZoomScale(1, animated: false)
             } else {
-                scrollView.focus(on: focusedBox)
+                scrollView.zoom(onTo: zoomBox)
             }
         }
         
@@ -104,30 +79,32 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
 }
 
 extension Notification.Name {
-    public static var focusZoomableScrollView: Notification.Name { return .init("focusZoomableScrollView") }
+    public static var zoomZoomableScrollView: Notification.Name { return .init("zoomZoomableScrollView") }
 }
 
 extension Notification {
     public struct ZoomableScrollViewKeys {
-        public static let focusedBox = "focusedBox"
+        public static let zoomBox = "zoomBox"
     }
 }
 
 /// This identifies an area of the ZoomableScrollView to focus on
-public struct FocusedBox {
+public struct ZoomBox {
     
-    /// This is the boundingBox (in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision)
+    /// This is the boundingBox—in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision, with the y-axis starting from the bottom)
     let boundingBox: CGRect
     let padded: Bool
     let animated: Bool
     let imageSize: CGSize
+    let imageId: UUID
     
-    public init(boundingBox: CGRect, animated: Bool = true, padded: Bool = true, imageSize: CGSize) {
+    public init(boundingBox: CGRect, animated: Bool = true, padded: Bool = true, imageSize: CGSize, imageId: UUID) {
         self.boundingBox = boundingBox
         self.padded = padded
         self.animated = animated
         self.imageSize = imageSize
+        self.imageId = imageId
     }
     
-    public static let none = Self.init(boundingBox: .zero, imageSize: .zero)
+//    public static let none = Self.init(boundingBox: .zero, imageSize: .zero, imageId: UUID())
 }

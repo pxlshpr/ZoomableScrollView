@@ -18,12 +18,12 @@ extension UIScrollView {
                              y: point.y - (zoomSize.height / factor))
         return CGRect(origin: origin, size: zoomSize)
     }
-    func focus(on focusedBox: FocusedBox, animated: Bool = true) {
+    func zoom(onTo zoomBox: ZoomBox, animated: Bool = true) {
         zoomIn(
-            boundingBox: focusedBox.boundingBox,
-            padded: focusedBox.padded,
-            imageSize: focusedBox.imageSize,
-            animated: focusedBox.animated
+            boundingBox: zoomBox.boundingBox,
+            padded: zoomBox.padded,
+            imageSize: zoomBox.imageSize,
+            animated: zoomBox.animated
         )
     }
     
