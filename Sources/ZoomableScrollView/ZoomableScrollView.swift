@@ -57,16 +57,16 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         context.coordinator.hostingController.rootView = self.content
         assert(context.coordinator.hostingController.view.superview == uiView)
         
-        if let focusedBox = focusedBox?.wrappedValue {
-            
-            /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
-            if focusedBox.boundingBox == .zero {
-                uiView.setZoomScale(1, animated: true)
-            } else {
-                uiView.focus(on: focusedBox)
-            }
-            //            self.focusedBox?.wrappedValue = nil
-        }
+//        if let focusedBox = focusedBox?.wrappedValue {
+//            
+//            /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
+//            if focusedBox.boundingBox == .zero {
+//                uiView.setZoomScale(1, animated: true)
+//            } else {
+//                uiView.focus(on: focusedBox)
+//            }
+//            //            self.focusedBox?.wrappedValue = nil
+//        }
     }
     
     // MARK: - Coordinator

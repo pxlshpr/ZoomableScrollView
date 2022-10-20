@@ -72,32 +72,30 @@ extension ZoomableScrollView {
                 scrollView.zoomToScale(1, on: point)
             }
         } else {
-            let newScale: CGFloat
             if scrollView.zoomScale < (maxZoomScale - minDelta) {
-                newScale = maxZoomScale
+                scrollView.zoomToScale(maxZoomScale, on: point)
             } else {
-                newScale = 1
+                scrollView.setZoomScale(1, animated: true)
             }
-            scrollView.zoomToScale(newScale, on: point)
         }
     }
 
-    func zoomRectForDoubleTap(on point: CGPoint, for scrollView: UIScrollView) -> CGRect {
-        return scrollView.zoomRect(forFactorChangeInZoomScaleOf: 5, on: point)
-    }
-    
-    func zoomRectForDoubleTap_legacy(on point: CGPoint, for scrollView: UIScrollView) -> CGRect {
-        let sizeToBaseRectOn = scrollView.frame.size
-        
-        let size = CGSize(width: sizeToBaseRectOn.width / 2,
-                          height: sizeToBaseRectOn.height / 2)
-        let zoomSize = CGSize(width: size.width / scrollView.zoomScale,
-                              height: size.height / scrollView.zoomScale)
-        
-        let origin = CGPoint(x: point.x - zoomSize.width / 2,
-                             y: point.y - zoomSize.height / 2)
-        return CGRect(origin: origin, size: zoomSize)
-    }
+//    func zoomRectForDoubleTap(on point: CGPoint, for scrollView: UIScrollView) -> CGRect {
+//        return scrollView.zoomRect(forFactorChangeInZoomScaleOf: 5, on: point)
+//    }
+//
+//    func zoomRectForDoubleTap_legacy(on point: CGPoint, for scrollView: UIScrollView) -> CGRect {
+//        let sizeToBaseRectOn = scrollView.frame.size
+//
+//        let size = CGSize(width: sizeToBaseRectOn.width / 2,
+//                          height: sizeToBaseRectOn.height / 2)
+//        let zoomSize = CGSize(width: size.width / scrollView.zoomScale,
+//                              height: size.height / scrollView.zoomScale)
+//
+//        let origin = CGPoint(x: point.x - zoomSize.width / 2,
+//                             y: point.y - zoomSize.height / 2)
+//        return CGRect(origin: origin, size: zoomSize)
+//    }
     
     func zoomScaleOfBoundingBox(_ boundingBox: CGRect, forImageSize imageSize: CGSize, padded: Bool, scrollView: UIScrollView) -> CGFloat {
         let zoomRect = boundingBox.zoomRect(forImageSize: imageSize,
