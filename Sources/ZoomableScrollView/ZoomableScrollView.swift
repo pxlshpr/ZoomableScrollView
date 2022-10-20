@@ -52,13 +52,35 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         return Coordinator(hostingController: UIHostingController(rootView: self.content))
     }
     
-    public func updateUIView(_ uiView: UIScrollView, context: Context) {
-        // update the hosting controller's SwiftUI content
+    public func updateUIView(_ scrollView: UIScrollView, context: Context) {
         context.coordinator.hostingController.rootView = self.content
-        assert(context.coordinator.hostingController.view.superview == uiView)
+        assert(context.coordinator.hostingController.view.superview == scrollView)
+        
+        func printScrollView(for scale: CGFloat) {
+            print("🍄 Setting zoomScale to \(scale) when:")
+            print("🍄    scrollView.contentSize: \(scrollView.contentSize)")
+            print("🍄    UIScreen.main.bounds.size: \(UIScreen.main.bounds.size)")
+        }
+
+        let delay = 0.1
+        Task(priority: .high) {
+            await MainActor.run { scrollView.setZoomScale(1.01, animated: false) }
+            await MainActor.run { scrollView.setZoomScale(1, animated: false) }
+            
+            await MainActor.run {
+                guard let focusedBox = focusedBox?.wrappedValue else {
+                    return
+                }
+                if focusedBox.boundingBox == .zero, scrollView.zoomScale != 1 {
+                    scrollView.setZoomScale(1, animated: false)
+                } else {
+                    scrollView.focus(on: focusedBox)
+                }
+            }
+        }
         
 //        if let focusedBox = focusedBox?.wrappedValue {
-//            
+//
 //            /// If we've set it to `.zero` we're indicating that we want it to reset the zoom
 //            if focusedBox.boundingBox == .zero {
 //                uiView.setZoomScale(1, animated: true)
@@ -89,4 +111,13 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
             print("🔍 zoomScale is \(scrollView.zoomScale)")
         }
     }
+}
+
+
+func sleepTask(_ seconds: CGFloat, tolerance: Int = 1) async throws {
+    try await Task.sleep(
+        until: .now + .seconds(seconds),
+        tolerance: .seconds(tolerance),
+        clock: .suspending
+    )
 }
