@@ -45,7 +45,12 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     }
     
     public func makeUIView(context: Context) -> UIScrollView {
-        scrollView(context: context)
+        let scrollView = scrollView(context: context)
+        Task(priority: .high) {
+            await MainActor.run { scrollView.setZoomScale(1.01, animated: false) }
+            await MainActor.run { scrollView.setZoomScale(1, animated: false) }
+        }
+        return scrollView
     }
     
     public func makeCoordinator() -> Coordinator {
@@ -56,28 +61,21 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         context.coordinator.hostingController.rootView = self.content
         assert(context.coordinator.hostingController.view.superview == scrollView)
         
-        func printScrollView(for scale: CGFloat) {
-            print("🍄 Setting zoomScale to \(scale) when:")
-            print("🍄    scrollView.contentSize: \(scrollView.contentSize)")
-            print("🍄    UIScreen.main.bounds.size: \(UIScreen.main.bounds.size)")
-        }
-
-        let delay = 0.1
-        Task(priority: .high) {
-            await MainActor.run { scrollView.setZoomScale(1.01, animated: false) }
-            await MainActor.run { scrollView.setZoomScale(1, animated: false) }
-            
-            await MainActor.run {
-                guard let focusedBox = focusedBox?.wrappedValue else {
-                    return
-                }
-                if focusedBox.boundingBox == .zero, scrollView.zoomScale != 1 {
-                    scrollView.setZoomScale(1, animated: false)
-                } else {
-                    scrollView.focus(on: focusedBox)
-                }
-            }
-        }
+//        Task(priority: .high) {
+//            await MainActor.run { scrollView.setZoomScale(1.01, animated: false) }
+//            await MainActor.run { scrollView.setZoomScale(1, animated: false) }
+//
+//            await MainActor.run {
+//                guard let focusedBox = focusedBox?.wrappedValue else {
+//                    return
+//                }
+//                if focusedBox.boundingBox == .zero, scrollView.zoomScale != 1 {
+//                    scrollView.setZoomScale(1, animated: false)
+//                } else {
+//                    scrollView.focus(on: focusedBox)
+//                }
+//            }
+//        }
         
 //        if let focusedBox = focusedBox?.wrappedValue {
 //
