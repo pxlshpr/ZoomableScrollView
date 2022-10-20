@@ -58,6 +58,7 @@ extension ZoomableScrollView {
     func handleDoubleTap(on point: CGPoint, for scrollView: UIScrollView) {
         let maxZoomScale = 3.5
         let minDelta = 0.5
+        let minBoundingBoxScale = 1.3
 
         if let zoomBox = zoomBox?.wrappedValue,
            zoomBox.boundingBox != .zero
@@ -67,7 +68,11 @@ extension ZoomableScrollView {
                                                           padded: zoomBox.padded,
                                                           scrollView: scrollView)
             if scrollView.zoomScale < boundingBoxScale {
-                scrollView.zoom(onTo: zoomBox)
+                if boundingBoxScale >= minBoundingBoxScale {
+                    scrollView.zoom(onTo: zoomBox)
+                } else {
+                    scrollView.zoomToScale(maxZoomScale, on: point)
+                }
             } else {
                 scrollView.zoomToScale(1, on: point)
             }
