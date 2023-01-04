@@ -58,10 +58,15 @@ public struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         
         @objc func zoomZoomableScrollView(notification: Notification) {
             guard let zoomBox = notification.userInfo?[Notification.ZoomableScrollViewKeys.zoomBox] as? ZoomBox,
-                  zoomBox.imageId == id,
                   let scrollView
-            else {
-                return
+            else { return }
+            
+            /// If an `id` was provided, make sure it matches
+            if let zoomBoxImageId = zoomBox.imageId {
+                guard zoomBoxImageId == id else {
+                    /// `ZoomBox` was mean for another `ZoomableScrollView`
+                    return
+                }
             }
             
             if zoomBox.boundingBox == .zero {
@@ -98,9 +103,9 @@ public struct ZoomBox {
     let padded: Bool
     let animated: Bool
     let imageSize: CGSize
-    let imageId: UUID
+    let imageId: UUID?
     
-    public init(boundingBox: CGRect, animated: Bool = true, padded: Bool = true, imageSize: CGSize, imageId: UUID) {
+    public init(boundingBox: CGRect, animated: Bool = true, padded: Bool = true, imageSize: CGSize, imageId: UUID? = nil) {
         self.boundingBox = boundingBox
         self.padded = padded
         self.animated = animated
