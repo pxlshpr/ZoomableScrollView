@@ -15,8 +15,8 @@ let package = Package(
             targets: ["ZoomableScrollView"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.187"),
-        .package(url: "https://github.com/pxlshpr/VisionSugar", from: "0.0.54"),
+        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.320"),
+        .package(url: "https://github.com/pxlshpr/VisionSugar", from: "0.0.75"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
