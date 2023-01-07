@@ -42,11 +42,26 @@ class CenteringScrollView: UIScrollView {
 //        print("🔩     contentSize: \(contentSize)")
     }
     
+    func centerCapture() {
+        guard subviews.count == 1 else { return }
+        let size = subviews[0].frame.size
+//        let x = max(0, bounds.width - size.width) / 2
+//        let y = max(0, bounds.height - size.height) / 2
+//        let frame = CGRectMake(x, y, size.width, size.height)
+//        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
+//        subviews[0].frame = frame
+        
+        contentOffset = CGPoint(x: size.width / 4.0, y: 0)
+//        print("🔩     contentOffset: \(contentOffset)")
+//        print("🔩     contentSize: \(contentSize)")
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
 //        if shouldCenter {
 //            centerContent()
 //        }
+        centerCapture()
     }
 }
 
