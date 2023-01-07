@@ -51,7 +51,7 @@ class CenteringScrollView: UIScrollView {
 //        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
 //        subviews[0].frame = frame
         
-        contentOffset = CGPoint(x: size.width / 2.0, y: 0)
+        contentOffset = CGPoint(x: 0, y: 0)
 //        print("🔩     contentOffset: \(contentOffset)")
 //        print("🔩     contentSize: \(contentSize)")
     }
