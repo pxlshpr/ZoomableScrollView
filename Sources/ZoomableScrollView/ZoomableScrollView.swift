@@ -89,7 +89,7 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
             scrollView.bouncesZoom = true
             scrollView.showsHorizontalScrollIndicator = false
             scrollView.showsVerticalScrollIndicator = false
-            scrollView.clipsToBounds = false
+//            scrollView.clipsToBounds = false
 
             /// Changed this to `.always` after discovering that `.never` caused a slight vertical offset when displaying an image at zoom scale 1 on a full screen.
             /// The potential repurcisions of these haven't been explored—so keep an eye on this, as it may break other uses.
