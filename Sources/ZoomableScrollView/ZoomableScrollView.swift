@@ -191,7 +191,7 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
 //                }
             }
 
-            if zoomBox.boundingBox == .zero {
+            if zoomBox.boundingBox == .zero || zoomBox.boundingBox == CGRect(x: 0, y: 0, width: 1, height: 1) {
                 /// Only set the `zoomScale` to 1 if it's not already at 1
                 guard scrollView.zoomScale != 1 else { return }
                 scrollView.setZoomScale(1, animated: false)
