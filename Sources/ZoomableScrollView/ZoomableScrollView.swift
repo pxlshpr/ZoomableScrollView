@@ -20,6 +20,8 @@ public struct ZoomableScrollView<Content: View>: View {
 }
 
 class CenteringScrollView: UIScrollView {
+    var shouldCenter: Bool = true
+    
     func centerContent() {
 //        assert(subviews.count == 1)
 //        mutate(&subviews[0].frame) {
@@ -42,7 +44,9 @@ class CenteringScrollView: UIScrollView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        centerContent()
+//        if shouldCenter {
+//            centerContent()
+//        }
     }
 }
 
