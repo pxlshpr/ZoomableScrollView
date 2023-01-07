@@ -21,12 +21,23 @@ public struct ZoomableScrollView<Content: View>: View {
 
 class CenteringScrollView: UIScrollView {
     func centerContent() {
-        assert(subviews.count == 1)
-        mutate(&subviews[0].frame) {
-            // not clear why view.center.{x,y} = bounds.mid{X,Y} doesn't work -- maybe transform?
-            $0.origin.x = max(0, bounds.width - $0.width) / 2
-            $0.origin.y = max(0, bounds.height - $0.height) / 2
-        }
+//        assert(subviews.count == 1)
+//        mutate(&subviews[0].frame) {
+//            // not clear why view.center.{x,y} = bounds.mid{X,Y} doesn't work -- maybe transform?
+//            $0.origin.x = max(0, bounds.width - $0.width) / 2
+//            $0.origin.y = max(0, bounds.height - $0.height) / 2
+//        }
+        guard subviews.count == 1 else { return }
+        let size = subviews[0].frame.size
+        let x = max(0, bounds.width - size.width) / 2
+        let y = max(0, bounds.height - size.height) / 2
+        let frame = CGRectMake(x, y, size.width, size.height)
+//        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
+        subviews[0].frame = frame
+        
+        contentOffset = CGPoint(x: 0, y: 0)
+//        print("🔩     contentOffset: \(contentOffset)")
+//        print("🔩     contentSize: \(contentSize)")
     }
     
     override func layoutSubviews() {
@@ -89,12 +100,12 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
             scrollView.bouncesZoom = true
             scrollView.showsHorizontalScrollIndicator = false
             scrollView.showsVerticalScrollIndicator = false
-//            scrollView.clipsToBounds = false
 
             /// Changed this to `.always` after discovering that `.never` caused a slight vertical offset when displaying an image at zoom scale 1 on a full screen.
             /// The potential repurcisions of these haven't been explored—so keep an eye on this, as it may break other uses.
 //            scrollView.contentInsetAdjustmentBehavior = .never
-//            scrollView.contentInsetAdjustmentBehavior = .always
+            //TODO: only use this if the image has a width-height ratio that's equal or tall (not for wide images)
+            scrollView.contentInsetAdjustmentBehavior = .always
 
             let hostedView = coordinator.hostingController.view!
             hostedView.translatesAutoresizingMaskIntoConstraints = false
