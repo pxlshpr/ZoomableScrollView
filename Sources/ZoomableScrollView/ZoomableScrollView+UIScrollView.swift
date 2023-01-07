@@ -34,10 +34,17 @@ extension ZoomableScrollView {
         scrollView.addSubview(hosted)
         
         scrollView.setZoomScale(1, animated: true)
-        
-        scrollView.addTapGestureRecognizer { sender in
-            let hostedView = hostedView(context: context)
-            let point = sender.location(in: hostedView)
+
+        scrollView.addTapGestureRecognizer { recognizer in
+            
+            /// 🛑 **WARNING** 🛑
+            /// This caused a retain cycle (`UIHostingController` ends up never getting released, causing a massive memory build up
+            /// due to the storage of an image here. We're using `nil` instead, which has the same effect.
+            /// 🚧 Remove this when cleasing this up.
+//            let hostedView = hostedView(context: context)
+//            let point = recognizer.location(in: hostedView)
+            
+            let point = recognizer.location(in: nil)
             handleDoubleTap(on: point, for: scrollView)
         }
         
