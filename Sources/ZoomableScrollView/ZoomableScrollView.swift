@@ -42,12 +42,12 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
     func makeUIViewController(context: Context) -> ViewController {
         let viewController = ViewController(coordinator: context.coordinator, doubleTap: doubleTap)
         Task(priority: .high) {
-            await MainActor.run {
-                viewController.scrollView.setZoomScale(1.01, animated: false)
-            }
-            await MainActor.run {
-                viewController.scrollView.setZoomScale(1, animated: false)
-            }
+//            await MainActor.run {
+//                viewController.scrollView.setZoomScale(1.01, animated: false)
+//            }
+//            await MainActor.run {
+//                viewController.scrollView.setZoomScale(1, animated: false)
+//            }
         }
         return viewController
     }
@@ -94,27 +94,28 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
             /// Changed this to `.always` after discovering that `.never` caused a slight vertical offset when displaying an image at zoom scale 1 on a full screen.
             /// The potential repurcisions of these haven't been explored—so keep an eye on this, as it may break other uses.
     //        scrollView.contentInsetAdjustmentBehavior = .never
-            scrollView.contentInsetAdjustmentBehavior = .always
+//            scrollView.contentInsetAdjustmentBehavior = .always
 
             let hostedView = coordinator.hostingController.view!
             hostedView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.addSubview(hostedView)
-            hostedView.translatesAutoresizingMaskIntoConstraints = true
-            hostedView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            hostedView.frame = scrollView.bounds
-            hostedView.insetsLayoutMarginsFromSafeArea = false
+//            hostedView.translatesAutoresizingMaskIntoConstraints = true
+//            hostedView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+//            hostedView.frame = scrollView.bounds
+//            hostedView.insetsLayoutMarginsFromSafeArea = false
 //            if let backgroundColor {
-            hostedView.backgroundColor = .black
+//            hostedView.backgroundColor = .black
 //            }
             
-            scrollView.setZoomScale(1, animated: false)
+//            scrollView.setZoomScale(1.01, animated: true)
+//            scrollView.setZoomScale(1, animated: true)
 
-//            NSLayoutConstraint.activate([
-//                hostedView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-//                hostedView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-//                hostedView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-//                hostedView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-//            ])
+            NSLayoutConstraint.activate([
+                hostedView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+                hostedView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+                hostedView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+                hostedView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            ])
             
             updateConstraintsCancellable = scrollView.publisher(for: \.bounds).map(\.size).removeDuplicates()
                 .sink { [unowned self] size in
