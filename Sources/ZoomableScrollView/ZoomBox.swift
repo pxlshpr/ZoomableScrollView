@@ -14,11 +14,11 @@ extension Notification {
 public struct ZoomBox {
     
     /// This is the boundingBox—in terms of a 0 to 1 ratio on each dimension of what the CGRect is (similar to the boundingBox in Vision, with the y-axis starting from the bottom)
-    let boundingBox: CGRect
-    let padded: Bool
-    let animated: Bool
-    let imageSize: CGSize
-    let imageId: UUID?
+    public let boundingBox: CGRect
+    public let padded: Bool
+    public let animated: Bool
+    public let imageSize: CGSize
+    public let imageId: UUID?
     
     public init(boundingBox: CGRect, animated: Bool = true, padded: Bool = true, imageSize: CGSize, imageId: UUID? = nil) {
         self.boundingBox = boundingBox
