@@ -107,8 +107,8 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
 //            hostedView.backgroundColor = .black
 //            }
             
-//            scrollView.setZoomScale(1.01, animated: true)
-//            scrollView.setZoomScale(1, animated: true)
+            scrollView.setZoomScale(2.01, animated: true)
+            scrollView.setZoomScale(1, animated: true)
 
             NSLayoutConstraint.activate([
                 hostedView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
