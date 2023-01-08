@@ -2,11 +2,14 @@ import Foundation
 
 extension Notification.Name {
     public static var zoomZoomableScrollView: Notification.Name { return .init("zoomZoomableScrollView") }
+    public static var zoomToFillZoomableScrollView: Notification.Name { return .init("zoomToFillZoomableScrollView") }
+    public static var zoomToFitZoomableScrollView: Notification.Name { return .init("zoomToFitZoomableScrollView") }
 }
 
 extension Notification {
     public struct ZoomableScrollViewKeys {
         public static let zoomBox = "zoomBox"
+        public static let imageSize = "imageSize"
     }
 }
 

@@ -20,7 +20,6 @@ public struct ZoomableScrollView<Content: View>: View {
 }
 
 class CenteringScrollView: UIScrollView {
-    var shouldCenter: Bool = true
     
     func centerContent() {
 //        assert(subviews.count == 1)
@@ -34,11 +33,14 @@ class CenteringScrollView: UIScrollView {
         let x = max(0, bounds.width - size.width) / 2
         let y = max(0, bounds.height - size.height) / 2
         let frame = CGRectMake(x, y, size.width, size.height)
-//        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
+        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
         subviews[0].frame = frame
         
-        contentOffset = CGPoint(x: 0, y: 0)
-//        print("🔩     contentOffset: \(contentOffset)")
+        if shouldCenterCapture {
+            contentOffset = CGPoint(x: contentOffset.x, y: 0)
+        }
+//        contentOffset = CGPoint(x: 0, y: 0)
+        print("🔩     contentOffset: \(contentOffset)")
 //        print("🔩     contentSize: \(contentSize)")
     }
     
@@ -59,11 +61,67 @@ class CenteringScrollView: UIScrollView {
     override func layoutSubviews() {
         super.layoutSubviews()
 //        if shouldCenter {
-//            centerContent()
+            centerContent()
 //        }
-        centerCapture()
+//        if shouldCenterCapture {
+//            centerCapture()
+//        }
+    }
+    
+    var shouldCenterCapture: Bool = true
+
+    func zoomToFill(_ imageSize: CGSize) {
+        print("🍉 Zoom to fill \(imageSize)")
+//        shouldCenterCapture = true
+//        layoutSubviews()
+        let boundingBox = UIScreen.main.bounds.size.boundingBoxToFill(imageSize)
+
+        if boundingBox == .zero || boundingBox == CGRect(x: 0, y: 0, width: 1, height: 1) {
+            /// Only set the `zoomScale` to 1 if it's not already at 1
+            guard zoomScale != 1 else { return }
+            setZoomScale(1, animated: false)
+        } else {
+            shouldCenterCapture = true
+            let zoomRect = boundingBox.zoomRect(
+                forImageSize: imageSize,
+                fittedInto: bounds.size,
+                padded: false
+            )
+            zoom(to: zoomRect, animated: true)
+//            setContentOffset(CGPoint(x: calculatedX, y: 0), animated: true)
+        }
+        
+//        shouldCenterCapture = true
+    }
+    
+    func zoomToFit(_ imageSize: CGSize) {
+        print("Zoom to fit")
     }
 }
+
+extension CGSize {
+    func boundingBoxToFill(_ size: CGSize) -> CGRect {
+        let scaledWidth: CGFloat = (size.width * self.height) / size.height
+
+        let x: CGFloat = ((scaledWidth - self.width) / 2.0)
+        let h: CGFloat = size.height
+        
+        let rect = CGRect(
+            x: x / scaledWidth,
+            y: 0,
+            width: (self.width / scaledWidth),
+            height: h / size.height
+        )
+
+        print("🧮 scaledWidth: \(scaledWidth)")
+        print("🧮 bounds size: \(self)")
+        print("🧮 imageSize: \(size)")
+        print("🧮 rect: \(rect)")
+        return rect
+    }
+
+}
+
 
 fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepresentable {
     let content: Content
@@ -154,13 +212,33 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
             doubleTapCancellable = doubleTap.sink { [unowned self] in handleDoubleTap() }
             
             NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(zoomZoomableScrollView),
-                name: .zoomZoomableScrollView,
-                object: nil
+                self, selector: #selector(zoomZoomableScrollView),
+                name: .zoomZoomableScrollView, object: nil
+            )
+            
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(zoomToFitZoomableScrollView),
+                name: .zoomToFitZoomableScrollView, object: nil
+            )
+
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(zoomToFillZoomableScrollView),
+                name: .zoomToFillZoomableScrollView, object: nil
             )
         }
         
+        @objc func zoomToFitZoomableScrollView(notification: Notification) {
+            guard let imageSize = notification.userInfo?[Notification.ZoomableScrollViewKeys.imageSize] as? CGSize
+            else { return }
+            scrollView.zoomToFit(imageSize)
+        }
+
+        @objc func zoomToFillZoomableScrollView(notification: Notification) {
+            guard let imageSize = notification.userInfo?[Notification.ZoomableScrollViewKeys.imageSize] as? CGSize
+            else { return }
+            scrollView.zoomToFill(imageSize)
+        }
+
         func update(content: Content, doubleTap: AnyPublisher<Void, Never>) {
             coordinator.hostingController.rootView = content
             scrollView.setNeedsUpdateConstraints()

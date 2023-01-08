@@ -20,6 +20,7 @@ extension UIScrollView {
                              y: point.y - (zoomSize.height / factor))
         return CGRect(origin: origin, size: zoomSize)
     }
+    
     func zoom(onTo zoomBox: ZoomBox, animated: Bool = true) {
         zoomIn(
             boundingBox: zoomBox.boundingBox,
