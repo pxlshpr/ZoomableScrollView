@@ -38,8 +38,9 @@ class CenteringScrollView: UIScrollView {
         
         if shouldCenterCapture {
             contentOffset = CGPoint(x: contentOffset.x, y: 0)
+        } else {
+            contentOffset = CGPoint(x: 0, y: 0)
         }
-//        contentOffset = CGPoint(x: 0, y: 0)
         print("🔩     contentOffset: \(contentOffset)")
 //        print("🔩     contentSize: \(contentSize)")
     }
