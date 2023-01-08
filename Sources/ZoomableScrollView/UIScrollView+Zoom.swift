@@ -39,12 +39,12 @@ extension UIScrollView {
 //            zoomRect.pad(within: frame.size, ratio: ratio)
 //        }
 
-//        print("🔍 zoomIn on: \(zoomRect) within \(frame.size)")
-//        let zoomScaleX = frame.size.width / zoomRect.width
-//        print("🔍 zoomScaleX is \(zoomScaleX)")
-//        let zoomScaleY = frame.size.height / zoomRect.height
-//        print("🔍 zoomScaleY is \(zoomScaleY)")
-//        print("🔍 🤖 calculated zoomScale is: \(zoomRect.zoomScale(within: frame.size))")
+        print("🔍 zoomIn on: \(zoomRect) within \(frame.size)")
+        let zoomScaleX = frame.size.width / zoomRect.width
+        print("🔍 zoomScaleX is \(zoomScaleX)")
+        let zoomScaleY = frame.size.height / zoomRect.height
+        print("🔍 zoomScaleY is \(zoomScaleY)")
+        print("🔍 🤖 calculated zoomScale is: \(zoomRect.zoomScale(within: frame.size))")
 
         zoom(to: zoomRect, animated: animated)
     }
@@ -121,25 +121,28 @@ extension CGRect {
         size.height += padding
     }
 
-    func rectForSize(_ size: CGSize, fittedInto frameSize: CGSize) -> CGRect {
+    func rectForSize(_ size: CGSize, fittedInto frameSize: CGSize, withLegacyPaddingCorrections: Bool = false) -> CGRect {
         let sizeFittingFrame = size.sizeFittingWithin(frameSize)
         var rect = rectForSize(sizeFittingFrame)
 
-        let paddingLeft: CGFloat?
-        let paddingTop: CGFloat?
-        if size.widthToHeightRatio < frameSize.widthToHeightRatio {
-            paddingLeft = (frameSize.width - sizeFittingFrame.width) / 2.0
-            paddingTop = nil
-        } else {
-            paddingLeft = nil
-            paddingTop = (frameSize.height - sizeFittingFrame.height) / 2.0
-        }
+        //TODO: Remove these (are they even needed now?)
+        if withLegacyPaddingCorrections {
+            let paddingLeft: CGFloat?
+            let paddingTop: CGFloat?
+            if size.widthToHeightRatio < frameSize.widthToHeightRatio {
+                paddingLeft = (frameSize.width - sizeFittingFrame.width) / 2.0
+                paddingTop = nil
+            } else {
+                paddingLeft = nil
+                paddingTop = (frameSize.height - sizeFittingFrame.height) / 2.0
+            }
 
-        if let paddingLeft {
-            rect.origin.x += paddingLeft
-        }
-        if let paddingTop {
-            rect.origin.y += paddingTop
+            if let paddingLeft {
+                rect.origin.x += paddingLeft
+            }
+            if let paddingTop {
+                rect.origin.y += paddingTop
+            }
         }
 
         return rect

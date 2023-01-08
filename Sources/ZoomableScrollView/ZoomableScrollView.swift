@@ -29,110 +29,80 @@ class CenteringScrollView: UIScrollView {
     
     var shouldCenterCapture: Bool = false
     var shouldCenterToFit: Bool = true
-    
     var relativeAspectRatioType: RelativeAspectRatioType? = nil
-    
     var isAtDefaultScale = true
-
-    func centerContent() {
-//        assert(subviews.count == 1)
-//        mutate(&subviews[0].frame) {
-//            // not clear why view.center.{x,y} = bounds.mid{X,Y} doesn't work -- maybe transform?
-//            $0.origin.x = max(0, bounds.width - $0.width) / 2
-//            $0.origin.y = max(0, bounds.height - $0.height) / 2
-//        }
-        guard subviews.count == 1 else { return }
-        let size = subviews[0].frame.size
-        let x = max(0, bounds.width - size.width) / 2
-        let y = max(0, bounds.height - size.height) / 2
-        let frame = CGRectMake(x, y, size.width, size.height)
-        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
-        subviews[0].frame = frame
-        
-//        if shouldCenterCapture {
-//            contentOffset = CGPoint(x: contentOffset.x, y: 0)
-//        } else if shouldCenterToFit {
-//            contentOffset = CGPoint(x: 0, y: 0)
-//        }
-        if let relativeAspectRatioType {
-            switch relativeAspectRatioType {
-            case .taller:
-//                contentOffset = CGPoint(x: contentOffset.x, y: 0)
-                contentOffset = CGPoint(x: 0, y: contentOffset.y)
-            case .wider:
-//                contentOffset = CGPoint(x: contentOffset.x, y: 0)
-                
-                //TODO: NEXT
-                /// [ ] See if this breaks our initial display with zoomToFill and zoomToFit
-                /// [ ] Get the correct zoom rect from the columns (use the headers too)
-                /// [ ] Now test this on different sized images (we might have to fix the taller case)
-                /// [ ] Start testing zoom rects that result in a scale less than 1 (zooms out)
-                /// [ ] Move this code back to ZoomableScrollView
-                /// [ ] See why the cheesecake doesn't slide up with an animation and simply appears (hint: it also doesn't animate when zooming out to fit before cropping)
-                /// [ ] Don't zoom back out before cropping and instead place cropped images on the current zoom level (calculate their positions accordingly)
-                /// [ ] Remove the fourth wiggle of the cropped images (as it's too much)
-
-                /// When zooming to a specific rectangle (center it)
-                if contentSize.height >= bounds.height {
-                    let y = (contentSize.height - bounds.height) / 2.0
-                    contentOffset = CGPoint(x: contentOffset.x, y: y)
-                } else {
-                    /// Test zoom rect's that result in a scale < 1
-                }
-                
-            case .equal:
-//                contentOffset = CGPoint(x: contentOffset.x, y: 0)
-                break
-            }
-        } else if shouldCenterToFit {
-            contentOffset = CGPoint(x: 0, y: 0)
+    var zoomRect: CGRect = .zero
+    
+    var shouldPositionContent = true
+    
+    func positionContent() {
+        guard !isDragging,
+              shouldPositionContent,
+              subviews.count == 1
+        else {
+            print("🔩     contentOffset: \(contentOffset), zoomScale: \(zoomScale)")
+            return
         }
-
-
         
+        let screenSize = bounds.size
+        let scaledImageSize = subviews[0].frame.size
         
-        print("🔩     contentOffset: \(contentOffset)")
-//        print("🔩     contentSize: \(contentSize)")
+        let contentOffset: CGPoint
+        if scaledImageSize.isWider(than: screenSize) {
+
+            let y: CGFloat
+            if zoomRect == .zero || scaledImageSize.height < screenSize.height  {
+                /// If we're not zooming into a rect, (or the rect is shorter than the screen's height), center it vertically
+                /// (it's negative since we want to move the offset upwards—and show the black bars above and below it)
+                y = -(screenSize.height - scaledImageSize.height) / 2
+            } else {
+                /// Otherwise leave it alone
+                y = self.contentOffset.y
+            }
+            
+            /// Get the (scaled) x position of the zoom rect.
+            let widthRatio =  scaledImageSize.width / screenSize.width
+            let x = zoomRect.origin.x * widthRatio
+
+            contentOffset = CGPoint(x: x, y: y)
+            
+        } else if scaledImageSize.isTaller(than: screenSize) {
+            
+            let x: CGFloat
+            if zoomRect == .zero || scaledImageSize.width < screenSize.width  {
+                /// If we're not zooming into a rect, (or the rect is narrower than the screen's width), center it horizontally
+                /// (it's negative since we want to move the offset leftwards—and show the black bars to the sides of it)
+                x = -(screenSize.width - scaledImageSize.width) / 2
+            } else {
+                /// Otherwise leave it alone
+                x = self.contentOffset.x
+            }
+            
+            /// Get the (scaled) y position of the zoom rect
+            let heightRatio =  scaledImageSize.height / screenSize.height
+            let y = zoomRect.origin.y * heightRatio
+
+            contentOffset = CGPoint(x: x, y: y)
+            
+        } else {
+            /// same aspect ratio's, so no offset necessary to center
+            contentOffset = self.contentOffset
+        }
+        
+//        withAnimation(.interactiveSpring()) {
+            self.setContentOffset(contentOffset, animated: false)
+//        }
+        
+        print("🔩     contentOffset: \(contentOffset), zoomScale: \(zoomScale)")
     }
 
-//    func centerCapture() {
-//        guard subviews.count == 1 else { return }
-//        let x = (contentSize.width - bounds.width) / 2.0
-////        let x = max(0, bounds.width - size.width) / 2
-////        let y = max(0, bounds.height - size.height) / 2
-////        let frame = CGRectMake(x, y, size.width, size.height)
-////        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
-////        subviews[0].frame = frame
-//
-//        if let relativeAspectRatioType {
-//            switch relativeAspectRatioType {
-//            case .taller:
-//                contentOffset = CGPoint(x: x, y: 0)
-//            case .wider:
-//                contentOffset = CGPoint(x: x, y: 0)
-//            case .equal:
-//                break
-////                contentOffset = CGPoint(x: x, y: 0)
-//            }
-//        }
-//        print("🔩     contentOffset: \(contentOffset)")
-//        print("🔩     contentSize: \(contentSize)")
-//    }
-    
     override func layoutSubviews() {
         super.layoutSubviews()
-//        if shouldCenter {
-            centerContent()
-//        }
-//        if shouldCenterCapture {
-//            centerCapture()
-//        }
+        positionContent()
     }
     
     func zoomToFill(_ imageSize: CGSize) {
         print("🍉 Zoom to fill \(imageSize)")
-//        shouldCenterCapture = true
-//        layoutSubviews()
         let boundingBox = UIScreen.main.bounds.size.boundingBoxToFill(imageSize)
 
         if boundingBox == .zero || boundingBox == CGRect(x: 0, y: 0, width: 1, height: 1) {
@@ -165,15 +135,31 @@ class CenteringScrollView: UIScrollView {
 //                    return
 //                }
 //        }
+        shouldPositionContent = true
+        zoomRect = .zero
 
         if zoomBox.boundingBox == .zero || zoomBox.boundingBox == CGRect(x: 0, y: 0, width: 1, height: 1) {
             guard zoomScale != 1 else { return }
 //            guard !isAtDefaultScale else { return }
-            setZoomScale(1, animated: false)
+            relativeAspectRatioType = nil
+            shouldCenterToFit = true
+            setZoomScale(1, animated: zoomBox.animated)
         } else {
             relativeAspectRatioType = bounds.size.relativeAspectRatio(of: zoomBox.imageSize)
+//            relativeAspectRatioType = zoomBox.boundingBox.size.relativeAspectRatio(of: bounds.size)
             shouldCenterToFit = false
-            zoom(onTo: zoomBox)
+            
+            
+//            zoom(onTo: zoomBox)
+            var zoomRect = zoomBox.boundingBox.zoomRect(forImageSize: zoomBox.imageSize, fittedInto: frame.size, padded: false)
+            zoomRect = CGRect(
+                x: zoomRect.origin.x,
+                y: zoomRect.origin.y,
+                width: zoomRect.size.width,
+                height: zoomRect.size.height
+            )
+            self.zoomRect = zoomRect
+            zoom(to: zoomRect, animated: zoomBox.animated)
         }
         
 //        isAtDefaultScale = false
@@ -189,6 +175,15 @@ extension CGFloat {
 }
 
 extension CGSize {
+    
+    func isWider(than other: CGSize) -> Bool {
+        widthToHeightRatio > other.widthToHeightRatio
+    }
+    
+    func isTaller(than other: CGSize) -> Bool {
+        widthToHeightRatio < other.widthToHeightRatio
+    }
+    
     func relativeAspectRatio(of other: CGSize) -> RelativeAspectRatioType {
         let ratio = widthToHeightRatio.rounded(toPlaces: 2)
         let otherRatio = other.widthToHeightRatio.rounded(toPlaces: 2)
@@ -201,6 +196,20 @@ extension CGSize {
         } else {
             return .equal
         }
+    }
+}
+
+func relativeAspectRatio(of size: CGSize, to other: CGSize) -> RelativeAspectRatioType {
+    let ratio = size.widthToHeightRatio.rounded(toPlaces: 2)
+    let otherRatio = other.widthToHeightRatio.rounded(toPlaces: 2)
+//        let ratio = widthToHeightRatio
+//        let otherRatio = other.widthToHeightRatio
+    if otherRatio > ratio {
+        return .wider
+    } else if otherRatio < ratio {
+        return .taller
+    } else {
+        return .equal
     }
 }
 
@@ -379,7 +388,7 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
             // For some reason this is needed in both didZoom and layoutSubviews, thanks to https://medium.com/@ssamadgh/designing-apps-with-scroll-views-part-i-8a7a44a5adf7
             // Sometimes this seems to work (view animates size and position simultaneously from current position to center) and sometimes it does not (position snaps to center immediately, size change animates)
-            self.scrollView.centerContent()
+            self.scrollView.positionContent()
         }
         
         override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -390,6 +399,10 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
         
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             return hostedView
+        }
+        
+        func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+            self.scrollView.shouldPositionContent = false
         }
         
         @objc func zoomZoomableScrollView(notification: Notification) {
@@ -410,6 +423,7 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
         }
     }
 }
+
 
 extension UIViewControllerTransitionCoordinator {
     // Fix UIKit method that's named poorly for trailing closure style
