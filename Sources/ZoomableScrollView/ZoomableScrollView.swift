@@ -19,8 +19,21 @@ public struct ZoomableScrollView<Content: View>: View {
     }
 }
 
+enum RelativeAspectRatioType {
+    case taller
+    case wider
+    case equal
+}
+
 class CenteringScrollView: UIScrollView {
     
+    var shouldCenterCapture: Bool = false
+    var shouldCenterToFit: Bool = true
+    
+    var relativeAspectRatioType: RelativeAspectRatioType? = nil
+    
+    var isAtDefaultScale = true
+
     func centerContent() {
 //        assert(subviews.count == 1)
 //        mutate(&subviews[0].frame) {
@@ -36,28 +49,53 @@ class CenteringScrollView: UIScrollView {
         print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
         subviews[0].frame = frame
         
-        if shouldCenterCapture {
-            contentOffset = CGPoint(x: contentOffset.x, y: 0)
-        } else {
+//        if shouldCenterCapture {
+//            contentOffset = CGPoint(x: contentOffset.x, y: 0)
+//        } else if shouldCenterToFit {
+//            contentOffset = CGPoint(x: 0, y: 0)
+//        }
+        if let relativeAspectRatioType {
+            switch relativeAspectRatioType {
+            case .taller:
+//                contentOffset = CGPoint(x: contentOffset.x, y: 0)
+                contentOffset = CGPoint(x: 0, y: contentOffset.y)
+            case .wider:
+                contentOffset = CGPoint(x: contentOffset.x, y: 0)
+            case .equal:
+//                contentOffset = CGPoint(x: contentOffset.x, y: 0)
+                break
+            }
+        } else if shouldCenterToFit {
             contentOffset = CGPoint(x: 0, y: 0)
         }
+
         print("🔩     contentOffset: \(contentOffset)")
 //        print("🔩     contentSize: \(contentSize)")
     }
     
-    func centerCapture() {
-        guard subviews.count == 1 else { return }
-        let x = (contentSize.width - bounds.width) / 2.0
-//        let x = max(0, bounds.width - size.width) / 2
-//        let y = max(0, bounds.height - size.height) / 2
-//        let frame = CGRectMake(x, y, size.width, size.height)
-//        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
-//        subviews[0].frame = frame
-        
-        contentOffset = CGPoint(x: x, y: 0)
-        print("🔩     contentOffset: \(contentOffset)")
-        print("🔩     contentSize: \(contentSize)")
-    }
+//    func centerCapture() {
+//        guard subviews.count == 1 else { return }
+//        let x = (contentSize.width - bounds.width) / 2.0
+////        let x = max(0, bounds.width - size.width) / 2
+////        let y = max(0, bounds.height - size.height) / 2
+////        let frame = CGRectMake(x, y, size.width, size.height)
+////        print("🔩 centerContent: setting frame of subviews[0] to \(frame)")
+////        subviews[0].frame = frame
+//
+//        if let relativeAspectRatioType {
+//            switch relativeAspectRatioType {
+//            case .taller:
+//                contentOffset = CGPoint(x: x, y: 0)
+//            case .wider:
+//                contentOffset = CGPoint(x: x, y: 0)
+//            case .equal:
+//                break
+////                contentOffset = CGPoint(x: x, y: 0)
+//            }
+//        }
+//        print("🔩     contentOffset: \(contentOffset)")
+//        print("🔩     contentSize: \(contentSize)")
+//    }
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -69,8 +107,6 @@ class CenteringScrollView: UIScrollView {
 //        }
     }
     
-    var shouldCenterCapture: Bool = false
-
     func zoomToFill(_ imageSize: CGSize) {
         print("🍉 Zoom to fill \(imageSize)")
 //        shouldCenterCapture = true
@@ -97,6 +133,52 @@ class CenteringScrollView: UIScrollView {
     
     func zoomToFit(_ imageSize: CGSize) {
         print("Zoom to fit")
+    }
+    
+    func zoomTo(_ zoomBox: ZoomBox) {
+        /// If an `id` was provided, make sure it matches
+//        if let zoomBoxImageId = zoomBox.imageId {
+//                guard zoomBoxImageId == id else {
+//                    /// `ZoomBox` was mean for another `ZoomableScrollView`
+//                    return
+//                }
+//        }
+
+        if zoomBox.boundingBox == .zero || zoomBox.boundingBox == CGRect(x: 0, y: 0, width: 1, height: 1) {
+            guard zoomScale != 1 else { return }
+//            guard !isAtDefaultScale else { return }
+            setZoomScale(1, animated: false)
+        } else {
+            relativeAspectRatioType = bounds.size.relativeAspectRatio(of: zoomBox.imageSize)
+            shouldCenterToFit = false
+            zoom(onTo: zoomBox)
+        }
+        
+//        isAtDefaultScale = false
+    }
+}
+
+import SwiftSugar
+
+extension CGFloat {
+    func rounded(toPlaces places: Int) -> CGFloat {
+        Double(self).rounded(toPlaces: places)
+    }
+}
+
+extension CGSize {
+    func relativeAspectRatio(of other: CGSize) -> RelativeAspectRatioType {
+        let ratio = widthToHeightRatio.rounded(toPlaces: 2)
+        let otherRatio = other.widthToHeightRatio.rounded(toPlaces: 2)
+//        let ratio = widthToHeightRatio
+//        let otherRatio = other.widthToHeightRatio
+        if otherRatio > ratio {
+            return .wider
+        } else if otherRatio < ratio {
+            return .taller
+        } else {
+            return .equal
+        }
     }
 }
 
@@ -291,22 +373,7 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
         @objc func zoomZoomableScrollView(notification: Notification) {
             guard let zoomBox = notification.userInfo?[Notification.ZoomableScrollViewKeys.zoomBox] as? ZoomBox
             else { return }
-
-            /// If an `id` was provided, make sure it matches
-            if let zoomBoxImageId = zoomBox.imageId {
-//                guard zoomBoxImageId == id else {
-//                    /// `ZoomBox` was mean for another `ZoomableScrollView`
-//                    return
-//                }
-            }
-
-            if zoomBox.boundingBox == .zero || zoomBox.boundingBox == CGRect(x: 0, y: 0, width: 1, height: 1) {
-                /// Only set the `zoomScale` to 1 if it's not already at 1
-                guard scrollView.zoomScale != 1 else { return }
-                scrollView.setZoomScale(1, animated: false)
-            } else {
-                scrollView.zoom(onTo: zoomBox)
-            }
+            scrollView.zoomTo(zoomBox)
         }
         
     }
