@@ -68,7 +68,7 @@ class CenteringScrollView: UIScrollView {
 //        }
     }
     
-    var shouldCenterCapture: Bool = true
+    var shouldCenterCapture: Bool = false
 
     func zoomToFill(_ imageSize: CGSize) {
         print("🍉 Zoom to fill \(imageSize)")
