@@ -60,7 +60,26 @@ class CenteringScrollView: UIScrollView {
 //                contentOffset = CGPoint(x: contentOffset.x, y: 0)
                 contentOffset = CGPoint(x: 0, y: contentOffset.y)
             case .wider:
-                contentOffset = CGPoint(x: contentOffset.x, y: 0)
+//                contentOffset = CGPoint(x: contentOffset.x, y: 0)
+                
+                //TODO: NEXT
+                /// [ ] See if this breaks our initial display with zoomToFill and zoomToFit
+                /// [ ] Get the correct zoom rect from the columns (use the headers too)
+                /// [ ] Now test this on different sized images (we might have to fix the taller case)
+                /// [ ] Start testing zoom rects that result in a scale less than 1 (zooms out)
+                /// [ ] Move this code back to ZoomableScrollView
+                /// [ ] See why the cheesecake doesn't slide up with an animation and simply appears (hint: it also doesn't animate when zooming out to fit before cropping)
+                /// [ ] Don't zoom back out before cropping and instead place cropped images on the current zoom level (calculate their positions accordingly)
+                /// [ ] Remove the fourth wiggle of the cropped images (as it's too much)
+
+                /// When zooming to a specific rectangle (center it)
+                if contentSize.height >= bounds.height {
+                    let y = (contentSize.height - bounds.height) / 2.0
+                    contentOffset = CGPoint(x: contentOffset.x, y: y)
+                } else {
+                    /// Test zoom rect's that result in a scale < 1
+                }
+                
             case .equal:
 //                contentOffset = CGPoint(x: contentOffset.x, y: 0)
                 break
@@ -75,7 +94,7 @@ class CenteringScrollView: UIScrollView {
         print("🔩     contentOffset: \(contentOffset)")
 //        print("🔩     contentSize: \(contentSize)")
     }
-    
+
 //    func centerCapture() {
 //        guard subviews.count == 1 else { return }
 //        let x = (contentSize.width - bounds.width) / 2.0
