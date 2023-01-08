@@ -33,4 +33,3 @@ public struct ZoomBox {
     
 //    public static let none = Self.init(boundingBox: .zero, imageSize: .zero, imageId: UUID())
 }
-
