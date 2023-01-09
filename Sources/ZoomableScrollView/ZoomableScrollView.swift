@@ -158,11 +158,82 @@ class CenteringScrollView: UIScrollView {
                 width: zoomRect.size.width,
                 height: zoomRect.size.height
             )
+
+            /// Do this only if ZoomBox has the option (have option for both top and bottom safeAreaPoints
+            zoomRect = paddedForUI(zoomRect)
+            
             self.zoomRect = zoomRect
             zoom(to: zoomRect, animated: zoomBox.animated)
         }
         
 //        isAtDefaultScale = false
+    }
+    
+    func paddedForUI(_ zoomRect: CGRect) -> CGRect {
+        
+        /// Modify this as needed to define a minimum aspect ratio for the area we're zooming into (so it does not get obstructed by the UI elements)
+        let safeSize = CGSize(width: 430, height: 530)
+        
+        let horizontalPadding: CGFloat
+        if zoomRect.size.isTaller(than: safeSize) {
+            horizontalPadding = (zoomRect.size.height * safeSize.widthToHeightRatio) - zoomRect.size.width
+        } else {
+            horizontalPadding = zoomRect.size.width * 0.1
+        }
+
+        return zoomRect.padHorizontally(by: horizontalPadding, in: frame)
+    }
+}
+
+extension CGRect {
+    func padHorizontally(by padding: CGFloat, in frame: CGRect) -> CGRect {
+        
+        var r = self
+        var horizontalPaddingNeeded = padding
+        
+        let maxLeadingPadding = r.minX
+        let maxTrailingPadding = frame.size.width - r.maxX
+        
+        /// First try adding half to the side with the most to spare
+        if maxLeadingPadding > maxTrailingPadding {
+            let leadingPadding = min(maxLeadingPadding, horizontalPaddingNeeded/2.0)
+            horizontalPaddingNeeded -= leadingPadding
+
+            /// Pad it by transposing it to the left and the expanding the width
+            r.origin.x = r.origin.x - leadingPadding
+            r.size.width = r.width + leadingPadding
+            
+            let trailingPadding = min(maxTrailingPadding, horizontalPaddingNeeded)
+            horizontalPaddingNeeded -= trailingPadding
+            
+            /// Pad it by expanding the width
+            r.size.width = r.width + trailingPadding
+
+        } else {
+
+            let trailingPadding = min(maxTrailingPadding, horizontalPaddingNeeded/2.0)
+            horizontalPaddingNeeded -= trailingPadding
+
+            /// Pad it by expanding the width
+            r.size.width = r.width + trailingPadding
+
+            let leadingPadding = min(maxLeadingPadding, horizontalPaddingNeeded)
+            horizontalPaddingNeeded -= leadingPadding
+            
+            /// Pad it by transposing it to the left and the expanding the width
+            r.origin.x = r.origin.x - leadingPadding
+            r.size.width = r.width + leadingPadding
+        }
+        
+        guard horizontalPaddingNeeded > 0 else {
+            return r
+        }
+        
+        /// Now if there's any padding left, divide amongst both sides equally
+        r.origin.x = r.origin.x - (horizontalPaddingNeeded/2.0)
+        r.size.width = r.width + (horizontalPaddingNeeded)
+        
+        return r
     }
 }
 
@@ -411,6 +482,12 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
             scrollView.zoomTo(zoomBox)
         }
         
+        func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+            NotificationCenter.default.post(name: .zoomableScrollViewDidEndZooming, object: nil, userInfo: [
+                Notification.ZoomableScrollViewKeys.contentSize: scrollView.contentSize,
+                Notification.ZoomableScrollViewKeys.contentOffset: scrollView.contentOffset
+            ])
+        }
     }
     
     // MARK: - Coordinator
@@ -423,7 +500,6 @@ fileprivate struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepres
         }
     }
 }
-
 
 extension UIViewControllerTransitionCoordinator {
     // Fix UIKit method that's named poorly for trailing closure style
